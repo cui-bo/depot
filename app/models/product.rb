@@ -10,4 +10,19 @@ class Product < ActiveRecord::Base
   validates_uniqueness_of :title, :on => :create, :message => "must be unique"  
   validates_format_of :image_url, :with => %r{\.(gif|jpg|png)}i, :on => :create, :message => "is invalid"
   
+  # relationship
+  has_many :line_items
+  
+  before_destroy :ensure_not_referenced_by_any_line_item
+  
+  # ensure that there are no line items referencing this product
+  def ensure_not_referenced_by_any_line_item
+    if line_items.count.zero?
+      return true
+    else
+      errors.add(:base, 'Line Items present')
+      return false
+    end
+  end
+  
 end
